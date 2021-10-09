@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Notification.mp3</file>
+        <file>Leaf.png</file>
+        <file>Leaf.ico</file>
+        <file>NotoSansCJKsc-Medium.otf</file>
+    </qresource>
+</RCC>
