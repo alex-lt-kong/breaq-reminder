@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     initTrayMenu();
     initBackgroundLoop();
 
-    QSettings settings("MamsdsStudio", "MamsdsQBreakReminder");
+    QSettings settings("ak-studio", "q-break-reminder");
     ui->plainTextEdit->setPlainText(settings.value("Notes").toString());
 
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::Dialog | Qt::Tool);
@@ -57,7 +57,7 @@ void MainWindow::on_actionExit_triggered()
 
 void MainWindow::on_BgLength_changed()
 {
-    QSettings settings("MamsdsStudio", "MamsdsQBreakReminder");
+    QSettings settings("ak-studio", "q-break-reminder");
     if (actionBgLen1->isChecked())
         settings.setValue("BgLength", 1);
     else if (actionBgLen10->isChecked())
@@ -74,7 +74,7 @@ void MainWindow::on_BgLength_changed()
 
 void MainWindow::on_FgLength_changed()
 {
-    QSettings settings("MamsdsStudio", "MamsdsQBreakReminder");
+    QSettings settings("ak-studio", "q-break-reminder");
     if (actionFgLen20->isChecked())
         settings.setValue("FgLength", 20);
     else if (actionFgLen40->isChecked())
@@ -157,7 +157,7 @@ void MainWindow::initTrayMenu()
 
 void MainWindow::DetermineMenuCheckStatus()
 {
-    QSettings settings("MamsdsStudio", "MamsdsQBreakReminder");
+    QSettings settings("ak-studio", "q-break-reminder");
     int t = settings.value("BgLength").toInt();
     if (t == 1)
         actionBgLen1->setChecked(true);
@@ -237,7 +237,7 @@ void MainWindow::foregroundLoop()
 
 void MainWindow::loadSettings()
 {
-    QSettings settings("MamsdsStudio", "MamsdsQBreakReminder");
+    QSettings settings("ak-studio", "q-break-reminder");
     BgLength = settings.value("BgLength").toInt();
     FgLength = settings.value("FgLength").toInt();
 }
@@ -267,7 +267,7 @@ void MainWindow::initForegroundLoop()
     FgCount = 0;
     BgCount = 0;
     IsMouseReleased = true;
-    QSettings settings("MamsdsStudio", "MamsdsQBreakReminder");
+    QSettings settings("ak-studio", "q-break-reminder");
     ui->plainTextEdit->setPlainText(settings.value("Notes").toString());
     tmrBg->stop();
 
@@ -297,7 +297,7 @@ void MainWindow::on_actionSkipBreak_triggered()
 
 void MainWindow::on_plainTextEdit_textChanged()
 {
-    QSettings settings("MamsdsStudio", "MamsdsQBreakReminder");
+    QSettings settings("ak-studio", "q-break-reminder");
     settings.setValue("Notes", ui->plainTextEdit->toPlainText());
 }
 

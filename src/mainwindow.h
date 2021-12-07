@@ -32,6 +32,7 @@ private slots:
     void on_actionExit_triggered();
     void initForegroundLoop();
     void on_FgLength_changed();
+    void on_BgLength_changed();
     void on_plainTextEdit_textChanged();
     void on_pushButton_clicked();
     void on_btnIcon_clicked();
@@ -43,7 +44,6 @@ private:
     QTimer *tmrBg;
     QTimer *tmrFg;
 
-    void on_BgLength_changed();
     void initBackgroundLoop();
     void foregroundLoopNotification();
 
