@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::Dialog | Qt::Tool);
 
-    ui->btnIcon->setIcon(QIcon(":/Leaf.png"));
+    ui->btnIcon->setIcon(QIcon(":/leaf.png"));
 //    ui->btnIcon->setFixedSize(64, 64);
 //    ui->btnIcon->setIconSize(ui->btnIcon->size());
 
@@ -91,11 +91,11 @@ void MainWindow::on_FgLength_changed()
 
 void MainWindow::initTrayMenu()
 {
-    QPixmap map = QPixmap(":/Leaf.png");
-    setWindowIcon(QIcon(":/Leaf.png"));
+    QPixmap map = QPixmap(":/leaf.png");
+    setWindowIcon(QIcon(":/leaf.png"));
     trayIcon = new QSystemTrayIcon(this);
-    trayIcon->setIcon(QIcon(":/Leaf.png"));
-    trayIcon->setToolTip("Mamsds QBreak Reminder");
+    trayIcon->setIcon(QIcon(":/leaf.png"));
+    trayIcon->setToolTip("QBreak Reminder");
 
     trayIcon->show();
 
@@ -217,26 +217,20 @@ void MainWindow::foregroundLoop()
 {
     FgCount++;
     ui->progressBar->setValue(FgCount * 100.0 / FgLength );
-    ui->btnOK->setText(QString::number(FgCount) + "/" + QString::number(FgLength));
+    ui->btnGo->setText(QString::number(FgCount) + "/" + QString::number(FgLength));
     ui->lblText->setText("Hi Pal, time to have a " + QString::number(FgLength) + "-second break! You have been using the computer for at least: " + secondsToString(startupTime.secsTo(QDateTime::currentDateTime())));
 
     if (IsBreakSkipped)
         this->initBackgroundLoop();
-
-/*    if (!IsMouseReleased)
-    {
-        QCursor c = QCursor();
-        c.setPos(mapToGlobal(QPoint(ui->btnIcon->x() + ui->btnIcon->size().width() / 2, ui->btnIcon->y() + ui->btnIcon->size().width() / 2)));
-        setCursor(c);
-    }*/
 
     if (FgCount >= FgLength)
     {
         tmrFg->stop();
         player->play();
 
-        ui->btnOK->setEnabled(true);
-        ui->btnOK->setText("Start!");
+        ui->btnGo->setEnabled(true);
+        ui->btnRestart->setEnabled(true);
+        ui->btnGo->setText("Go!");
     }
 
 }
@@ -256,12 +250,15 @@ void MainWindow::initBackgroundLoop()
     tmrBg->start(1000);
     tmrFg->stop();
     this->hide();
-    ui->btnOK->setEnabled(false);
+    ui->btnGo->setEnabled(false);
+    ui->btnRestart->setEnabled(false);
 }
 
 void MainWindow::foregroundLoopNotification()
 {
-    trayIcon->showMessage("Mamsds QBreak Reminder", "Time to have a break!", QSystemTrayIcon::Information,3500);
+    trayIcon->showMessage("QBreak Reminder", "Time to have a break!", QSystemTrayIcon::NoIcon, 3500);
+    // The original version is QSystemTrayIcon::Information, which will cause this bug:
+    // https://stackoverflow.com/questions/45827951/missing-file-icon-is-shown-in-the-system-tray-when-running-showmessage-with-no
 }
 
 void MainWindow::initForegroundLoop()
@@ -281,12 +278,9 @@ void MainWindow::initForegroundLoop()
         this->show();
         tmrFg->start(1000);
         setWindowSizeAndLocation();
+        ui->btnGo->setEnabled(false);
+        ui->btnRestart->setEnabled(false);
     }
-}
-
-void MainWindow::on_btnOK_clicked()
-{
-    initBackgroundLoop();
 }
 
 void MainWindow::on_actionEditNotes_triggered()
@@ -309,7 +303,6 @@ void MainWindow::on_plainTextEdit_textChanged()
 
 void MainWindow::on_pushButton_clicked()
 {
-    qDebug() << "on_actionEditNotes_triggered";
     dialogEditNotes myEN;
     myEN.exec();
 }
@@ -318,3 +311,15 @@ void MainWindow::on_btnIcon_clicked()
 {
     IsMouseReleased = true;
 }
+
+void MainWindow::on_btnGo_clicked()
+{
+    initBackgroundLoop();
+}
+
+
+void MainWindow::on_btnRestart_clicked()
+{
+    initForegroundLoop();
+}
+

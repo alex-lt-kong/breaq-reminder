@@ -17,10 +17,10 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>Mamsds QBreak Reminder</string>
+   <string>QBreak Reminder</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res.qrc">
+   <iconset>
     <normaloff>:/Leaf.png</normaloff>:/Leaf.png</iconset>
   </property>
   <property name="statusTip">
@@ -60,7 +60,7 @@
          <string/>
         </property>
         <property name="icon">
-         <iconset resource="res.qrc">
+         <iconset>
           <normaloff>:/Leaf.png</normaloff>:/Leaf.png</iconset>
         </property>
         <property name="iconSize">
@@ -118,7 +118,14 @@
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="btnOK">
+       <widget class="QPushButton" name="btnRestart">
+        <property name="text">
+         <string>Restart</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnGo">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
           <horstretch>2</horstretch>
@@ -126,7 +133,7 @@
          </sizepolicy>
         </property>
         <property name="text">
-         <string>Start!</string>
+         <string>Go!</string>
         </property>
        </widget>
       </item>
@@ -141,8 +148,6 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources>
-  <include location="res.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

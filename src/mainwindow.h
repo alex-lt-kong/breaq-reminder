@@ -27,25 +27,26 @@ public:
 private slots:
     void backgroundLoop();
     void foregroundLoop();
-    void on_btnOK_clicked();
     void on_actionEditNotes_triggered();
     void on_actionSkipBreak_triggered();
     void on_actionExit_triggered();
-    void on_BgLength_changed();
+    void initForegroundLoop();
     void on_FgLength_changed();
     void on_plainTextEdit_textChanged();
     void on_pushButton_clicked();
-
     void on_btnIcon_clicked();
+    void on_btnGo_clicked();
+    void on_btnRestart_clicked();
 
 private:
     Ui::MainWindow *ui;
     QTimer *tmrBg;
     QTimer *tmrFg;
 
+    void on_BgLength_changed();
     void initBackgroundLoop();
     void foregroundLoopNotification();
-    void initForegroundLoop();
+
     void initTrayMenu();
     void setWindowSizeAndLocation();
     void DetermineMenuCheckStatus();
