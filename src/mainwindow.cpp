@@ -204,7 +204,7 @@ MainWindow::~MainWindow()
 void MainWindow::backgroundLoop()
 {
     int t = (BgLength * 60 - BgCount + 59) / 60;
-    trayIcon->setToolTip("Mamsds QBreak Reminder\n" + QString::number(t) + " minute" + (t != 1 ? "s" : "") + " before the next break");
+    trayIcon->setToolTip("QBreak Reminder\n" + QString::number(t) + " minute" + (t != 1 ? "s" : "") + " before the next break");
     BgCount++;
 
     if (BgCount == BgLength * 60 - 10)
@@ -218,7 +218,7 @@ void MainWindow::foregroundLoop()
     FgCount++;
     ui->progressBar->setValue(FgCount * 100.0 / FgLength );
     ui->btnGo->setText(QString::number(FgCount) + "/" + QString::number(FgLength));
-    ui->lblText->setText("Hi Pal, time to have a " + QString::number(FgLength) + "-second break! You have been using the computer for at least: " + secondsToString(startupTime.secsTo(QDateTime::currentDateTime())));
+    ui->lblText->setText("Time to have a " + QString::number(FgLength) + "-second break! You have been using the computer for at least: " + secondsToString(startupTime.secsTo(QDateTime::currentDateTime())));
 
     if (IsBreakSkipped)
         this->initBackgroundLoop();
