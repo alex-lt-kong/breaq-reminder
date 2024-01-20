@@ -10,8 +10,6 @@ int main(int argc, char *argv[])
     QFont font = w.font();
     if (QGuiApplication::platformName() == "windows") {
         font.setFamily("Microsoft Yahei");
-    } else {
-        font.setFamily("Noto Sans CJK SC Medium");
     }
     QApplication::setFont(font);
 

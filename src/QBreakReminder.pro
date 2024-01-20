@@ -4,9 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT += core gui multimedia widgets
 
 TARGET = QBreakReminder
 TEMPLATE = app
@@ -25,19 +23,21 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
+        dialog-editnotes.cpp \
         main.cpp \
-        mainwindow.cpp \
-    dialogeditnotes.cpp
+        mainwindow.cpp
 
 HEADERS += \
-        mainwindow.h \
-    dialogeditnotes.h
+        dialog-editnotes.h \
+        mainwindow.h
 
 FORMS += \
-        mainwindow.ui \
-    dialogeditnotes.ui
+        dialog-editnotes.ui \
+        mainwindow.ui
 
 RC_ICONS = Leaf.ico
+
+#CONFIG += sanitizer sanitize_memory
 
 RESOURCES += \
     res.qrc

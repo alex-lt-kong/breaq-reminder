@@ -1,8 +1,8 @@
 #include "mainwindow.h"
-#include "ui_mainwindow.h"
-#include "dialogeditnotes.h"
-#include <QtGui>
 #include <QtCore>
+#include <QtGui>
+#include "dialog-editnotes.h"
+#include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -15,22 +15,19 @@ MainWindow::MainWindow(QWidget *parent) :
     tmrFg = new QTimer();
     connect(tmrFg, SIGNAL(timeout()), this, SLOT(foregroundLoop()));
 
-    startupTime = QDateTime::currentDateTime();
     initTrayMenu();
-    initBackgroundLoop();
+    initBackgroundCycle();
 
     QSettings settings("ak-studio", "q-break-reminder");
     ui->plainTextEdit->setPlainText(settings.value("Notes").toString());
+    ui->textEditMarkdownDisp->document()->setIndentWidth(10);
 
-    setWindowFlags(Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::Dialog | Qt::Tool);
-
-    ui->btnIcon->setIcon(QIcon(":/leaf.png"));
-//    ui->btnIcon->setFixedSize(64, 64);
-//    ui->btnIcon->setIconSize(ui->btnIcon->size());
+    setWindowFlags(Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowTitleHint
+                   | Qt::Dialog | Qt::Tool);
 
     player = new QMediaPlayer(this);
-    player->setVolume(50);
-    player->setMedia(QUrl("qrc:/Notification.mp3"));
+    //player->setVolume(50);
+    player->setSource(QUrl("qrc:/Notification.mp3"));
 
 //    QApplication::setFont(QFont("Noto Sans CJK SC Medium", 9));
 
@@ -38,60 +35,48 @@ MainWindow::MainWindow(QWidget *parent) :
     InitWindowHeight = this->size().height();
 }
 
-QString MainWindow::secondsToString(qint64 seconds)
-{
-    const qint64 DAY = 86400;
-    qint64 days = seconds / DAY;
-    QTime t = QTime(0,0).addSecs(seconds % DAY);
-    return QString::number(days) + " day" + (days != 1 ? "s, " : ", ")
-          + QString::number(t.hour()) + " hour" + (t.hour() != 1 ? "s, " : ", ")
-          + QString::number(t.minute()) + " minute" + (t.minute() != 1 ? "s and " : " and ")
-          + QString::number(t.second()) + " second" + (t.second() != 1 ? "s" : "");
-//  return QString("%1 days, %2 hours, %3 minutes, %4 seconds").arg(days).arg(t.hour()).arg(t.minute()).arg(t.second());
-}
-
 void MainWindow::on_actionExit_triggered()
 {
     QApplication::quit();
 }
 
-void MainWindow::on_BgLength_changed()
+void MainWindow::on_BackgroundCycleDurationChanged()
 {
     QSettings settings("ak-studio", "q-break-reminder");
     if (actionBgLen1->isChecked())
-        settings.setValue("BgLength", 1);
+        settings.setValue("BackgroundCycleDurationMin", 1);
     else if (actionBgLen10->isChecked())
-        settings.setValue("BgLength", 10);
+        settings.setValue("BackgroundCycleDurationMin", 10);
     else if (actionBgLen15->isChecked())
-        settings.setValue("BgLength", 15);
+        settings.setValue("BackgroundCycleDurationMin", 15);
     else if (actionBgLen20->isChecked())
-        settings.setValue("BgLength", 20);
+        settings.setValue("BackgroundCycleDurationMin", 20);
     else
-        DetermineMenuCheckStatus();
-    qDebug() << "on_BgLength_changed: " << settings.value("BgLength").toInt();
+        UpdateDurationCheckStatus();
+    qDebug() << "BackgroundCycleDurationMin changed to:"
+             << settings.value("BackgroundCycleDurationMin").toInt();
     loadSettings();
 }
 
-void MainWindow::on_FgLength_changed()
+void MainWindow::on_ForegroundCycleDurationChanged()
 {
     QSettings settings("ak-studio", "q-break-reminder");
     if (actionFgLen20->isChecked())
-        settings.setValue("FgLength", 20);
+        settings.setValue("ForegroundCycleDurationSec", 20);
     else if (actionFgLen40->isChecked())
-        settings.setValue("FgLength", 40);
+        settings.setValue("ForegroundCycleDurationSec", 40);
     else if (actionFgLen60->isChecked())
-        settings.setValue("FgLength", 60);
+        settings.setValue("ForegroundCycleDurationSec", 60);
     else if (actionFgLen120->isChecked())
-        settings.setValue("FgLength", 120);
+        settings.setValue("ForegroundCycleDurationSec", 120);
     else
-        DetermineMenuCheckStatus();
-//    qDebug() << "on_FgLength_changed: " << settings.value("FgLength").toInt();
+        UpdateDurationCheckStatus();
+    //    qDebug() << "on_ForegroundCycleDurationChanged: " << settings.value("ForegroundCycleDurationSec").toInt();
     loadSettings();
 }
 
 void MainWindow::initTrayMenu()
 {
-    QPixmap map = QPixmap(":/leaf.png");
     setWindowIcon(QIcon(":/leaf.png"));
     trayIcon = new QSystemTrayIcon(this);
     trayIcon->setIcon(QIcon(":/leaf.png"));
@@ -102,11 +87,12 @@ void MainWindow::initTrayMenu()
     menuTray = new QMenu(this);
 
     actionEditNotes = menuTray->addAction("Edit Notes");
-    connect(actionEditNotes, SIGNAL(triggered()), this, SLOT(on_actionEditNotes_triggered()));
+    connect(actionEditNotes, SIGNAL(triggered()), this, SLOT(on_actionEditNotesTriggered()));
     menuTray->addAction(actionEditNotes);
 
     actionSkipBreak = menuTray->addAction("Skip Next Break");
-    connect(actionSkipBreak, SIGNAL(triggered()), this, SLOT(on_actionSkipBreak_triggered()));
+    actionSkipBreak->setCheckable(true);
+    connect(actionSkipBreak, SIGNAL(triggered()), this, SLOT(on_actionSkipBreakTriggered()));
     menuTray->addAction(actionSkipBreak);
 
     menuBreakInverval = menuTray->addMenu("Break Interval (Min)");
@@ -123,10 +109,10 @@ void MainWindow::initTrayMenu()
     actiongroupBgLength->addAction(actionBgLen10);
     actiongroupBgLength->addAction(actionBgLen15);
     actiongroupBgLength->addAction(actionBgLen20);
-    connect(actionBgLen1, SIGNAL(changed()), this, SLOT(on_BgLength_changed()));
-    connect(actionBgLen10, SIGNAL(changed()), this, SLOT(on_BgLength_changed()));
-    connect(actionBgLen15, SIGNAL(changed()), this, SLOT(on_BgLength_changed()));
-    connect(actionBgLen20, SIGNAL(changed()), this, SLOT(on_BgLength_changed()));
+    connect(actionBgLen1, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
+    connect(actionBgLen10, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
+    connect(actionBgLen15, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
+    connect(actionBgLen20, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
 
     menuFgLengthSettings = menuTray->addMenu("Break Length (Sec)");
     actionFgLen20 = menuFgLengthSettings->addAction("20");
@@ -142,23 +128,23 @@ void MainWindow::initTrayMenu()
     actiongroupFgLength->addAction(actionFgLen40);
     actiongroupFgLength->addAction(actionFgLen60);
     actiongroupFgLength->addAction(actionFgLen120);
-    connect(actionFgLen20, SIGNAL(changed()), this, SLOT(on_FgLength_changed()));
-    connect(actionFgLen40, SIGNAL(changed()), this, SLOT(on_FgLength_changed()));
-    connect(actionFgLen20, SIGNAL(changed()), this, SLOT(on_FgLength_changed()));
-    connect(actionFgLen120, SIGNAL(changed()), this, SLOT(on_FgLength_changed()));
+    connect(actionFgLen20, SIGNAL(changed()), this, SLOT(on_ForegroundCycleDurationChanged()));
+    connect(actionFgLen40, SIGNAL(changed()), this, SLOT(on_ForegroundCycleDurationChanged()));
+    connect(actionFgLen20, SIGNAL(changed()), this, SLOT(on_ForegroundCycleDurationChanged()));
+    connect(actionFgLen120, SIGNAL(changed()), this, SLOT(on_ForegroundCycleDurationChanged()));
 
     actionExit = menuTray->addAction("Exit");
     connect(actionExit, SIGNAL(triggered()), this, SLOT(on_actionExit_triggered()));
     menuTray->addAction(actionExit);
 
-    DetermineMenuCheckStatus();
+    UpdateDurationCheckStatus();
     trayIcon->setContextMenu(menuTray);
 }
 
-void MainWindow::DetermineMenuCheckStatus()
+void MainWindow::UpdateDurationCheckStatus()
 {
     QSettings settings("ak-studio", "q-break-reminder");
-    int t = settings.value("BgLength").toInt();
+    auto t = settings.value("BackgroundCycleDurationMin").toInt();
     if (t == 1)
         actionBgLen1->setChecked(true);
     else if (t == 10)
@@ -168,7 +154,7 @@ void MainWindow::DetermineMenuCheckStatus()
     else
         actionBgLen20->setChecked(true);
 
-    t = settings.value("FgLength").toInt();
+    t = settings.value("ForegroundCycleDurationSec").toInt();
     if (t == 20)
         actionFgLen20->setChecked(true);
     else if (t == 40)
@@ -185,7 +171,8 @@ void MainWindow::setWindowSizeAndLocation()
     int screenWidth;
     int screenHeight;
 
-    this->setFixedSize(InitWindowWidth, InitWindowHeight);  // It appears that this function only needs to be called once to fix the size of the window.
+    // It appears that this function only needs to be called once to fix the size of the window.
+    this->setFixedSize(InitWindowWidth, InitWindowHeight);
 
     screenWidth = QGuiApplication::primaryScreen()->availableGeometry().width();
     screenHeight = QGuiApplication::primaryScreen()->availableGeometry().height();
@@ -193,38 +180,44 @@ void MainWindow::setWindowSizeAndLocation()
     x = (screenWidth - this->size().width());
     y = (screenHeight - this->size().height());
 
+    // https://stackoverflow.com/questions/3203095/display-window-full-screen-on-secondary-monitor-using-qt
+    this->windowHandle()->setScreen(QGuiApplication::primaryScreen());
     setGeometry(x, y, this->size().width(), this->size().height());
 }
 
 MainWindow::~MainWindow()
 {
+    delete actiongroupFgLength;
+    delete menuTray;
+    delete trayIcon;
     delete ui;
 }
 
 void MainWindow::backgroundLoop()
 {
-    int t = (BgLength * 60 - BgCount + 59) / 60;
+    int t = (background_cycle_duration_min * 60 - BgCount + 59) / 60;
     trayIcon->setToolTip("QBreak Reminder\n" + QString::number(t) + " minute" + (t != 1 ? "s" : "") + " before the next break");
     BgCount++;
 
-    if (BgCount == BgLength * 60 - 10)
+    if (BgCount == background_cycle_duration_min * 60 - 10)
         foregroundLoopNotification();
-    else if (BgCount >= BgLength * 60)
-        initForegroundLoop();
+    else if (BgCount >= background_cycle_duration_min * 60)
+        initForegroundCycle();
 }
 
 void MainWindow::foregroundLoop()
 {
-    FgCount++;
-    ui->progressBar->setValue(FgCount * 100.0 / FgLength );
-    ui->btnGo->setText(QString::number(FgCount) + "/" + QString::number(FgLength));
-    ui->lblText->setText("Time to have a " + QString::number(FgLength) + "-second break! You have been using the computer for at least: " + secondsToString(startupTime.secsTo(QDateTime::currentDateTime())));
+    foreground_sec_count++;
+    ui->progressBar->setValue(foreground_sec_count * 100.0 / foreground_cycle_duration_sec);
+    ui->btnGo->setText(QString::number(foreground_sec_count) + "/"
+                       + QString::number(foreground_cycle_duration_sec));
+    ui->lblText->setText("Time to have a " + QString::number(foreground_cycle_duration_sec)
+                         + "-second break!");
 
     if (IsBreakSkipped)
-        this->initBackgroundLoop();
+        this->initBackgroundCycle();
 
-    if (FgCount >= FgLength)
-    {
+    if (foreground_sec_count >= foreground_cycle_duration_sec) {
         tmrFg->stop();
         player->play();
 
@@ -232,20 +225,20 @@ void MainWindow::foregroundLoop()
         ui->btnRestart->setEnabled(true);
         ui->btnGo->setText("Go!");
     }
-
 }
 
 void MainWindow::loadSettings()
 {
     QSettings settings("ak-studio", "q-break-reminder");
-    BgLength = settings.value("BgLength").toInt();
-    FgLength = settings.value("FgLength").toInt();
+    background_cycle_duration_min = settings.value("BackgroundCycleDurationMin").toInt();
+    foreground_cycle_duration_sec = settings.value("ForegroundCycleDurationSec").toInt();
 }
 
-void MainWindow::initBackgroundLoop()
+void MainWindow::initBackgroundCycle()
 {
     loadSettings();
     IsBreakSkipped = false;
+    actionSkipBreak->setChecked(IsBreakSkipped);
     BgCount = 0;
     tmrBg->start(1000);
     tmrFg->stop();
@@ -261,20 +254,20 @@ void MainWindow::foregroundLoopNotification()
     // https://stackoverflow.com/questions/45827951/missing-file-icon-is-shown-in-the-system-tray-when-running-showmessage-with-no
 }
 
-void MainWindow::initForegroundLoop()
+void MainWindow::initForegroundCycle()
 {
     loadSettings();
-    FgCount = 0;
+    foreground_sec_count = 0;
     BgCount = 0;
     IsMouseReleased = true;
     QSettings settings("ak-studio", "q-break-reminder");
     ui->plainTextEdit->setPlainText(settings.value("Notes").toString());
     tmrBg->stop();
 
-    if (IsBreakSkipped)
-        this->initBackgroundLoop();
-    else
-    {
+    if (IsBreakSkipped) {
+        qDebug() << "this break should be skipped, starting backgound cycle again.";
+        this->initBackgroundCycle();
+    } else {
         this->show();
         tmrFg->start(1000);
         setWindowSizeAndLocation();
@@ -283,43 +276,44 @@ void MainWindow::initForegroundLoop()
     }
 }
 
-void MainWindow::on_actionEditNotes_triggered()
+void MainWindow::on_actionEditNotesTriggered()
 {
-    qDebug() << "on_actionEditNotes_triggered";
     dialogEditNotes myEN;
     myEN.exec();
 }
 
-void MainWindow::on_actionSkipBreak_triggered()
+void MainWindow::on_actionSkipBreakTriggered()
 {
     IsBreakSkipped = true;
+    actionSkipBreak->setChecked(IsBreakSkipped);
 }
 
 void MainWindow::on_plainTextEdit_textChanged()
 {
     QSettings settings("ak-studio", "q-break-reminder");
     settings.setValue("Notes", ui->plainTextEdit->toPlainText());
+    ui->textEditMarkdownDisp->setMarkdown(ui->plainTextEdit->toPlainText());
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_pushButtonClicked()
 {
     dialogEditNotes myEN;
     myEN.exec();
 }
 
-void MainWindow::on_btnIcon_clicked()
+void MainWindow::on_btnIconClicked()
 {
     IsMouseReleased = true;
 }
 
 void MainWindow::on_btnGo_clicked()
 {
-    initBackgroundLoop();
+    initBackgroundCycle();
 }
 
 
 void MainWindow::on_btnRestart_clicked()
 {
-    initForegroundLoop();
+    initForegroundCycle();
 }
 

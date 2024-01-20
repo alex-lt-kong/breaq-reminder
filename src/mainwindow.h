@@ -7,7 +7,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QMenu>
-#include <QDesktopWidget>
+#include <QScreen>
 #include <QDateTime>
 #include <QMediaPlayer>
 
@@ -27,15 +27,15 @@ public:
 private slots:
     void backgroundLoop();
     void foregroundLoop();
-    void on_actionEditNotes_triggered();
-    void on_actionSkipBreak_triggered();
+    void on_actionEditNotesTriggered();
+    void on_actionSkipBreakTriggered();
     void on_actionExit_triggered();
-    void initForegroundLoop();
-    void on_FgLength_changed();
-    void on_BgLength_changed();
+    void initForegroundCycle();
+    void on_ForegroundCycleDurationChanged();
+    void on_BackgroundCycleDurationChanged();
     void on_plainTextEdit_textChanged();
-    void on_pushButton_clicked();
-    void on_btnIcon_clicked();
+    void on_pushButtonClicked();
+    void on_btnIconClicked();
     void on_btnGo_clicked();
     void on_btnRestart_clicked();
 
@@ -44,12 +44,12 @@ private:
     QTimer *tmrBg;
     QTimer *tmrFg;
 
-    void initBackgroundLoop();
+    void initBackgroundCycle();
     void foregroundLoopNotification();
 
     void initTrayMenu();
     void setWindowSizeAndLocation();
-    void DetermineMenuCheckStatus();
+    void UpdateDurationCheckStatus();
     void loadSettings();
     QString secondsToString(qint64 seconds);
 
@@ -57,13 +57,12 @@ private:
 
     QMediaPlayer *player;
 
-    int BgCount, FgCount;
-    int BgLength = 20, FgLength = 5;
+    int BgCount, foreground_sec_count;
+    int background_cycle_duration_min = 20;
+    int foreground_cycle_duration_sec = 5;
     bool IsBreakSkipped;
     bool IsMouseReleased;
     int InitWindowWidth, InitWindowHeight;
-
-    QDateTime startupTime;
 
     QMenu *menuTray;
     QMenu *menuFgLengthSettings, *menuBreakInverval;

@@ -1,5 +1,5 @@
-#ifndef DIALOGEDITNOTES_H
-#define DIALOGEDITNOTES_H
+#ifndef DIALOG_EDITNOTES_H
+#define DIALOG_EDITNOTES_H
 
 #include <QDialog>
 
@@ -27,4 +27,4 @@ private:
     Ui::dialogEditNotes *ui;
 };
 
-#endif // DIALOGEDITNOTES_H
+#endif // DIALOG_EDITNOTES_H
