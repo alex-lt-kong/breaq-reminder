@@ -1,7 +1,7 @@
 #include "dialog-editnotes.h"
 #include <QtCore>
 #include <QtGui>
-#include "ui_dialogeditnotes.h"
+#include "ui_dialog-editnotes.h"
 
 dialogEditNotes::dialogEditNotes(QWidget *parent) :
     QDialog(parent),

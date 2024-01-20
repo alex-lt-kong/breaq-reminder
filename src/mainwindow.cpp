@@ -176,12 +176,23 @@ void MainWindow::setWindowSizeAndLocation()
 
     screenWidth = QGuiApplication::primaryScreen()->availableGeometry().width();
     screenHeight = QGuiApplication::primaryScreen()->availableGeometry().height();
+    qDebug() << "primaryScreen()'s width and height: " << screenWidth << "x" << screenHeight;
 
     x = (screenWidth - this->size().width());
     y = (screenHeight - this->size().height());
 
     // https://stackoverflow.com/questions/3203095/display-window-full-screen-on-secondary-monitor-using-qt
-    this->windowHandle()->setScreen(QGuiApplication::primaryScreen());
+    // this->windowHandle()->setScreen(QGuiApplication::primaryScreen());
+    /*qDebug() << "qApp->screens().length(): " << qApp->screens().length();
+    auto s = qApp->screens()[1];
+    qDebug() << s->name();
+    this->move(s->availableGeometry().width() - size().width(), s->availableGeometry().height() - size().height());
+    */
+    for (auto s : qApp->screens()) {
+        qDebug() << s->name();
+        this->move(s->availableGeometry().width() - size().width(), s->availableGeometry().height() - size().height());
+    }
+    this->windowHandle()->setScreen(qApp->screens()[1]);
     setGeometry(x, y, this->size().width(), this->size().height());
 }
 
