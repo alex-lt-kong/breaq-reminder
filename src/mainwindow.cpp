@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QSettings settings("ak-studio", "q-break-reminder");
     ui->plainTextEdit->setPlainText(settings.value("Notes").toString());
-    ui->textEditMarkdownDisp->document()->setIndentWidth(10);
+    ui->textEditMarkdownDisp->document()->setIndentWidth(15);
 
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowTitleHint
                    | Qt::Dialog | Qt::Tool);
@@ -45,16 +45,24 @@ void MainWindow::on_BackgroundCycleDurationChanged()
     QSettings settings("ak-studio", "q-break-reminder");
     if (actionBgLen1->isChecked())
         settings.setValue("BackgroundCycleDurationMin", 1);
-    else if (actionBgLen10->isChecked())
-        settings.setValue("BackgroundCycleDurationMin", 10);
     else if (actionBgLen15->isChecked())
         settings.setValue("BackgroundCycleDurationMin", 15);
     else if (actionBgLen20->isChecked())
         settings.setValue("BackgroundCycleDurationMin", 20);
     else
-        UpdateDurationCheckStatus();
+        UpdatTrayMenuCheckStatus();
     qDebug() << "BackgroundCycleDurationMin changed to:"
              << settings.value("BackgroundCycleDurationMin").toInt();
+    loadSettings();
+}
+
+void MainWindow::on_ScreenIndexChanged()
+{
+    QSettings settings("ak-studio", "q-break-reminder");
+    for (int i = 0; i < actionScreens.size(); ++i) {
+        if (actionScreens[i]->isChecked())
+            settings.setValue("ScreenIndex", i);
+    }
     loadSettings();
 }
 
@@ -70,7 +78,7 @@ void MainWindow::on_ForegroundCycleDurationChanged()
     else if (actionFgLen120->isChecked())
         settings.setValue("ForegroundCycleDurationSec", 120);
     else
-        UpdateDurationCheckStatus();
+        UpdatTrayMenuCheckStatus();
     //    qDebug() << "on_ForegroundCycleDurationChanged: " << settings.value("ForegroundCycleDurationSec").toInt();
     loadSettings();
 }
@@ -95,22 +103,28 @@ void MainWindow::initTrayMenu()
     connect(actionSkipBreak, SIGNAL(triggered()), this, SLOT(on_actionSkipBreakTriggered()));
     menuTray->addAction(actionSkipBreak);
 
+    actiongroupScreenSelection = new QActionGroup(this);
+    menuScreenSelection = menuTray->addMenu("Select screen");
+    for (int i = 0; i < qApp->screens().length(); ++i) {
+        actionScreens.emplace_back(
+            menuScreenSelection->addAction(QString::number(i) + ": " + qApp->screens()[i]->name()));
+        actionScreens[i]->setCheckable(true);
+        actiongroupScreenSelection->addAction(actionScreens[i]);
+        connect(actionScreens[i], SIGNAL(changed()), this, SLOT(on_ScreenIndexChanged()));
+    }
+
     menuBreakInverval = menuTray->addMenu("Break Interval (Min)");
     actionBgLen1 = menuBreakInverval->addAction("1");
     actionBgLen1->setCheckable(true);
-    actionBgLen10 = menuBreakInverval->addAction("10");
-    actionBgLen10->setCheckable(true);
     actionBgLen15 = menuBreakInverval->addAction("15");
     actionBgLen15->setCheckable(true);
     actionBgLen20 = menuBreakInverval->addAction("20");
     actionBgLen20->setCheckable(true);
-    actiongroupBgLength = new QActionGroup(this);
-    actiongroupBgLength->addAction(actionBgLen1);
-    actiongroupBgLength->addAction(actionBgLen10);
-    actiongroupBgLength->addAction(actionBgLen15);
-    actiongroupBgLength->addAction(actionBgLen20);
+    actiongroupBackgroundCycleDurationMin = new QActionGroup(this);
+    actiongroupBackgroundCycleDurationMin->addAction(actionBgLen1);
+    actiongroupBackgroundCycleDurationMin->addAction(actionBgLen15);
+    actiongroupBackgroundCycleDurationMin->addAction(actionBgLen20);
     connect(actionBgLen1, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
-    connect(actionBgLen10, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
     connect(actionBgLen15, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
     connect(actionBgLen20, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
 
@@ -123,11 +137,11 @@ void MainWindow::initTrayMenu()
     actionFgLen60->setCheckable(true);
     actionFgLen120 = menuFgLengthSettings->addAction("120");
     actionFgLen120->setCheckable(true);
-    actiongroupFgLength = new QActionGroup(this);
-    actiongroupFgLength->addAction(actionFgLen20);
-    actiongroupFgLength->addAction(actionFgLen40);
-    actiongroupFgLength->addAction(actionFgLen60);
-    actiongroupFgLength->addAction(actionFgLen120);
+    actiongroupForegroundCycleDurationSec = new QActionGroup(this);
+    actiongroupForegroundCycleDurationSec->addAction(actionFgLen20);
+    actiongroupForegroundCycleDurationSec->addAction(actionFgLen40);
+    actiongroupForegroundCycleDurationSec->addAction(actionFgLen60);
+    actiongroupForegroundCycleDurationSec->addAction(actionFgLen120);
     connect(actionFgLen20, SIGNAL(changed()), this, SLOT(on_ForegroundCycleDurationChanged()));
     connect(actionFgLen40, SIGNAL(changed()), this, SLOT(on_ForegroundCycleDurationChanged()));
     connect(actionFgLen20, SIGNAL(changed()), this, SLOT(on_ForegroundCycleDurationChanged()));
@@ -137,18 +151,16 @@ void MainWindow::initTrayMenu()
     connect(actionExit, SIGNAL(triggered()), this, SLOT(on_actionExit_triggered()));
     menuTray->addAction(actionExit);
 
-    UpdateDurationCheckStatus();
+    UpdatTrayMenuCheckStatus();
     trayIcon->setContextMenu(menuTray);
 }
 
-void MainWindow::UpdateDurationCheckStatus()
+void MainWindow::UpdatTrayMenuCheckStatus()
 {
     QSettings settings("ak-studio", "q-break-reminder");
     auto t = settings.value("BackgroundCycleDurationMin").toInt();
     if (t == 1)
         actionBgLen1->setChecked(true);
-    else if (t == 10)
-        actionBgLen10->setChecked(true);
     else if (t == 15)
         actionBgLen15->setChecked(true);
     else
@@ -163,42 +175,36 @@ void MainWindow::UpdateDurationCheckStatus()
         actionFgLen60->setChecked(true);
     else
         actionFgLen120->setChecked(true);
+
+    t = settings.value("ScreenIndex").toInt();
+    if (t >= actionScreens.size())
+        t = 0;
+    actionScreens[t]->setChecked(true);
 }
 
 void MainWindow::setWindowSizeAndLocation()
 {
-    int x, y;
-    int screenWidth;
-    int screenHeight;
-
     // It appears that this function only needs to be called once to fix the size of the window.
     this->setFixedSize(InitWindowWidth, InitWindowHeight);
 
-    screenWidth = QGuiApplication::primaryScreen()->availableGeometry().width();
-    screenHeight = QGuiApplication::primaryScreen()->availableGeometry().height();
-    qDebug() << "primaryScreen()'s width and height: " << screenWidth << "x" << screenHeight;
+    auto scselectedScreen = QGuiApplication::screens();
 
-    x = (screenWidth - this->size().width());
-    y = (screenHeight - this->size().height());
+    auto screenWidth = scselectedScreen[screenIdx]->availableGeometry().width();
+    auto screenHeight = scselectedScreen[screenIdx]->availableGeometry().height();
+    auto screenX = scselectedScreen[screenIdx]->availableGeometry().x();
+    auto screenY = scselectedScreen[screenIdx]->availableGeometry().y();
+    auto windowX = (screenWidth - this->size().width());
+    auto windowY = (screenHeight - this->size().height());
 
-    // https://stackoverflow.com/questions/3203095/display-window-full-screen-on-secondary-monitor-using-qt
-    // this->windowHandle()->setScreen(QGuiApplication::primaryScreen());
-    /*qDebug() << "qApp->screens().length(): " << qApp->screens().length();
-    auto s = qApp->screens()[1];
-    qDebug() << s->name();
-    this->move(s->availableGeometry().width() - size().width(), s->availableGeometry().height() - size().height());
-    */
-    for (auto s : qApp->screens()) {
-        qDebug() << s->name();
-        this->move(s->availableGeometry().width() - size().width(), s->availableGeometry().height() - size().height());
-    }
-    this->windowHandle()->setScreen(qApp->screens()[1]);
-    setGeometry(x, y, this->size().width(), this->size().height());
+    setGeometry(screenX + windowX, screenY + windowY, this->size().width(), this->size().height());
 }
 
 MainWindow::~MainWindow()
 {
-    delete actiongroupFgLength;
+    for (int i = 0; i < actionScreens.size(); ++i) {
+        delete actionScreens[i];
+    }
+    delete actiongroupForegroundCycleDurationSec;
     delete menuTray;
     delete trayIcon;
     delete ui;
@@ -243,6 +249,10 @@ void MainWindow::loadSettings()
     QSettings settings("ak-studio", "q-break-reminder");
     background_cycle_duration_min = settings.value("BackgroundCycleDurationMin").toInt();
     foreground_cycle_duration_sec = settings.value("ForegroundCycleDurationSec").toInt();
+    screenIdx = settings.value("ScreenIndex").toInt();
+    if (screenIdx >= actionScreens.size()) {
+        screenIdx = 0;
+    }
 }
 
 void MainWindow::initBackgroundCycle()

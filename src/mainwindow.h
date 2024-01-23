@@ -38,6 +38,7 @@ private slots:
     void on_btnIconClicked();
     void on_btnGo_clicked();
     void on_btnRestart_clicked();
+    void on_ScreenIndexChanged();
 
 private:
     Ui::MainWindow *ui;
@@ -49,7 +50,7 @@ private:
 
     void initTrayMenu();
     void setWindowSizeAndLocation();
-    void UpdateDurationCheckStatus();
+    void UpdatTrayMenuCheckStatus();
     void loadSettings();
     QString secondsToString(qint64 seconds);
 
@@ -64,15 +65,17 @@ private:
     bool IsMouseReleased;
     int InitWindowWidth, InitWindowHeight;
 
+    int screenIdx;
+
     QMenu *menuTray;
-    QMenu *menuFgLengthSettings, *menuBreakInverval;
+    QMenu *menuFgLengthSettings, *menuBreakInverval, *menuScreenSelection;
     QAction *actionEditNotes, *actionSkipBreak, *actionExit;
-    QActionGroup *actiongroupBgLength;
-    QAction *actionBgLen1, *actionBgLen10, *actionBgLen15, *actionBgLen20;
-    QActionGroup *actiongroupFgLength;
+    QActionGroup *actiongroupBackgroundCycleDurationMin;
+    QAction *actionBgLen1, *actionBgLen15, *actionBgLen20;
+    QActionGroup *actiongroupForegroundCycleDurationSec;
+    QActionGroup *actiongroupScreenSelection;
     QAction *actionFgLen20, *actionFgLen40, *actionFgLen60, *actionFgLen120;
-
-
+    std::vector<QAction *> actionScreens;
 };
 
 #endif // MAINWINDOW_H
