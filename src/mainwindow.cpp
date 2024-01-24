@@ -29,13 +29,13 @@ MainWindow::MainWindow(QWidget *parent) :
     //player->setVolume(50);
     player->setSource(QUrl("qrc:/Notification.mp3"));
 
-//    QApplication::setFont(QFont("Noto Sans CJK SC Medium", 9));
+    //    QApplication::setFont(QFont("Noto Sans CJK SC Medium", 9));
 
     InitWindowWidth = this->size().width();
     InitWindowHeight = this->size().height();
 }
 
-void MainWindow::on_actionExit_triggered()
+void MainWindow::on_actionExitTriggered()
 {
     QApplication::quit();
 }
@@ -148,7 +148,8 @@ void MainWindow::initTrayMenu()
     connect(actionFgLen120, SIGNAL(changed()), this, SLOT(on_ForegroundCycleDurationChanged()));
 
     actionExit = menuTray->addAction("Exit");
-    connect(actionExit, SIGNAL(triggered()), this, SLOT(on_actionExit_triggered()));
+    // connect(actionExit, SIGNAL(triggered()), this, SLOT(on_actionExit_triggered()));
+    connect(actionExit, &QAction::triggered, this, &MainWindow::on_actionExitTriggered);
     menuTray->addAction(actionExit);
 
     UpdatTrayMenuCheckStatus();
@@ -212,13 +213,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::backgroundLoop()
 {
-    int t = (background_cycle_duration_min * 60 - BgCount + 59) / 60;
+    int t = (background_cycle_duration_min * 60 - background_cycle_sec_count + 59) / 60;
     trayIcon->setToolTip("QBreak Reminder\n" + QString::number(t) + " minute" + (t != 1 ? "s" : "") + " before the next break");
-    BgCount++;
+    background_cycle_sec_count++;
 
-    if (BgCount == background_cycle_duration_min * 60 - 10)
+    if (background_cycle_sec_count == background_cycle_duration_min * 60 - 10)
         foregroundLoopNotification();
-    else if (BgCount >= background_cycle_duration_min * 60)
+    else if (background_cycle_sec_count >= background_cycle_duration_min * 60)
         initForegroundCycle();
 }
 
@@ -260,7 +261,7 @@ void MainWindow::initBackgroundCycle()
     loadSettings();
     IsBreakSkipped = false;
     actionSkipBreak->setChecked(IsBreakSkipped);
-    BgCount = 0;
+    background_cycle_sec_count = 0;
     tmrBg->start(1000);
     tmrFg->stop();
     this->hide();
@@ -279,8 +280,7 @@ void MainWindow::initForegroundCycle()
 {
     loadSettings();
     foreground_sec_count = 0;
-    BgCount = 0;
-    IsMouseReleased = true;
+    background_cycle_sec_count = 0;
     QSettings settings("ak-studio", "q-break-reminder");
     ui->plainTextEdit->setPlainText(settings.value("Notes").toString());
     tmrBg->stop();
@@ -305,7 +305,7 @@ void MainWindow::on_actionEditNotesTriggered()
 
 void MainWindow::on_actionSkipBreakTriggered()
 {
-    IsBreakSkipped = true;
+    IsBreakSkipped = !IsBreakSkipped;
     actionSkipBreak->setChecked(IsBreakSkipped);
 }
 
@@ -320,11 +320,6 @@ void MainWindow::on_pushButtonClicked()
 {
     dialogEditNotes myEN;
     myEN.exec();
-}
-
-void MainWindow::on_btnIconClicked()
-{
-    IsMouseReleased = true;
 }
 
 void MainWindow::on_btnGo_clicked()

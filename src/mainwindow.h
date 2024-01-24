@@ -29,13 +29,11 @@ private slots:
     void foregroundLoop();
     void on_actionEditNotesTriggered();
     void on_actionSkipBreakTriggered();
-    void on_actionExit_triggered();
-    void initForegroundCycle();
+    void on_actionExitTriggered();
     void on_ForegroundCycleDurationChanged();
     void on_BackgroundCycleDurationChanged();
     void on_plainTextEdit_textChanged();
     void on_pushButtonClicked();
-    void on_btnIconClicked();
     void on_btnGo_clicked();
     void on_btnRestart_clicked();
     void on_ScreenIndexChanged();
@@ -45,6 +43,7 @@ private:
     QTimer *tmrBg;
     QTimer *tmrFg;
 
+    void initForegroundCycle();
     void initBackgroundCycle();
     void foregroundLoopNotification();
 
@@ -58,11 +57,10 @@ private:
 
     QMediaPlayer *player;
 
-    int BgCount, foreground_sec_count;
+    int background_cycle_sec_count, foreground_sec_count;
     int background_cycle_duration_min = 20;
     int foreground_cycle_duration_sec = 5;
     bool IsBreakSkipped;
-    bool IsMouseReleased;
     int InitWindowWidth, InitWindowHeight;
 
     int screenIdx;
