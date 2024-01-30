@@ -31,7 +31,7 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="8">
       <item>
-       <widget class="QLabel" name="lblText">
+       <widget class="QLabel" name="lblReminderText">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="MinimumExpanding">
           <horstretch>7</horstretch>
