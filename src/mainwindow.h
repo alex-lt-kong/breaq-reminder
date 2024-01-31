@@ -62,7 +62,6 @@ private:
     int background_cycle_duration_min = 20;
     int foreground_cycle_duration_sec = 5;
     bool IsRestoreWindow;
-    int InitWindowWidth, InitWindowHeight;
 
     int screenIdx;
     int breaks_to_skip = 0;

@@ -20,9 +20,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initTrayMenu();
     initBackgroundCycle();
+    loadSettings();
 
-    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
-    ui->plainTextEdit->setPlainText(settings.value("Notes").toString());
     ui->textEditMarkdownDisp->document()->setIndentWidth(15);
 
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowTitleHint
@@ -34,8 +33,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //    QApplication::setFont(QFont("Noto Sans CJK SC Medium", 9));
 
-    InitWindowWidth = this->size().width();
-    InitWindowHeight = this->size().height();
+    //InitWindowWidth = this->size().width();
+    //InitWindowHeight = this->size().height();
 }
 
 void MainWindow::on_actionExitTriggered()
@@ -215,7 +214,7 @@ void MainWindow::UpdatTrayMenuCheckStatus()
 void MainWindow::setWindowSizeAndLocation()
 {
     // It appears that this function only needs to be called once to fix the size of the window.
-    this->setFixedSize(InitWindowWidth, InitWindowHeight);
+    // this->setFixedSize(InitWindowWidth, InitWindowHeight);
 
     auto allScreens = QGuiApplication::screens();
     if (screenIdx >= allScreens.length()) {
@@ -300,12 +299,18 @@ void MainWindow::loadSettings()
     IsRestoreWindow = settings.value("RestoreWindow", true).toBool();
     actionRestoreWindow->setChecked(IsRestoreWindow);
 
+    resize(settings.value("MainWindowWidth", 354).toInt(),
+           settings.value("MainWindowHeight", 245).toInt());
+
     UpdatTrayMenuCheckStatus();
     ui->plainTextEdit->setPlainText(settings.value("Notes").toString());
 }
 
 void MainWindow::initBackgroundCycle()
 {
+    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
+    settings.setValue("MainWindowWidth", size().width());
+    settings.setValue("MainWindowHeight", size().height());
     loadSettings();
     background_cycle_sec_count = 0;
     tmrBg->start(1000);
@@ -339,7 +344,7 @@ void MainWindow::initForegroundCycle()
                 break;
             }
         }
-        this->initBackgroundCycle();
+        initBackgroundCycle();
     } else {
         this->show();
         tmrFg->start(1000);
@@ -374,7 +379,6 @@ void MainWindow::on_btnGo_clicked()
 {
     initBackgroundCycle();
 }
-
 
 void MainWindow::on_btnRestart_clicked()
 {

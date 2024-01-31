@@ -20,8 +20,8 @@
    <string>QBreak Reminder</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/Leaf.png</normaloff>:/Leaf.png</iconset>
+   <iconset resource="res.qrc">
+    <normaloff>:/leaf.ico</normaloff>:/leaf.ico</iconset>
   </property>
   <property name="statusTip">
    <string/>
@@ -168,6 +168,8 @@
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="res.qrc"/>
+ </resources>
  <connections/>
 </ui>
