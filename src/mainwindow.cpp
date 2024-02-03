@@ -20,9 +20,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     initTrayMenu();
     initBackgroundCycle();
-    loadSettings();
+    // initBackgroundCycle() calls loadSettings();
+
+    ui->plainTextEdit->setTabStopDistance(20);
 
     ui->textEditMarkdownDisp->document()->setIndentWidth(15);
+    ui->textEditMarkdownDisp->document()->setBaselineOffset(-10);
+    /*
+    qreal lineSpacing = 10;
+    QTextCursor textCursor = ui->textEditMarkdownDisp->textCursor();
+    QTextBlockFormat *newFormat = new QTextBlockFormat();
+    textCursor.clearSelection();
+    textCursor.select(QTextCursor::Document);
+    newFormat->setLineHeight(lineSpacing, QTextBlockFormat::ProportionalHeight);
+    textCursor.setBlockFormat(*newFormat);*/
 
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowTitleHint
                    | Qt::Dialog | Qt::Tool);
@@ -39,6 +50,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::on_actionExitTriggered()
 {
+    tmrBg->stop();
+    tmrFg->stop();
     QApplication::quit();
 }
 
@@ -308,9 +321,6 @@ void MainWindow::loadSettings()
 
 void MainWindow::initBackgroundCycle()
 {
-    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
-    settings.setValue("MainWindowWidth", size().width());
-    settings.setValue("MainWindowHeight", size().height());
     loadSettings();
     background_cycle_sec_count = 0;
     tmrBg->start(1000);
@@ -377,11 +387,21 @@ void MainWindow::on_pushButtonClicked()
 
 void MainWindow::on_btnGo_clicked()
 {
+    {
+        QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
+        settings.setValue("MainWindowWidth", size().width());
+        settings.setValue("MainWindowHeight", size().height());
+    }
     initBackgroundCycle();
 }
 
 void MainWindow::on_btnRestart_clicked()
 {
+    {
+        QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
+        settings.setValue("MainWindowWidth", size().width());
+        settings.setValue("MainWindowHeight", size().height());
+    }
     initForegroundCycle();
 }
 

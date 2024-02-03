@@ -27,7 +27,7 @@
    <string/>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,7,1">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0">
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="8">
       <item>
