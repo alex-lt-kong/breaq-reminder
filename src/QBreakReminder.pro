@@ -41,3 +41,5 @@ RC_ICONS = Leaf.ico
 
 RESOURCES += \
     res.qrc
+
+VERSION = 1.1
