@@ -17,10 +17,10 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>QBreak Reminder</string>
+   <string>Breaq Reminder</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="res.qrc">
+   <iconset resource="../resources/res.qrc">
     <normaloff>:/leaf.ico</normaloff>:/leaf.ico</iconset>
   </property>
   <property name="statusTip">
@@ -169,7 +169,7 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="res.qrc"/>
+  <include location="../resources/res.qrc"/>
  </resources>
  <connections/>
 </ui>

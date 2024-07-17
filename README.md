@@ -1,14 +1,7 @@
-# q-break-reminder
-
-## Dependancies
-
-### Debian
-
-* OpenGL: `sudo apt-get install libgl-dev`
-* VAAPI: `sudo apt install libva-dev`
+# Breaq Reminder
 
 ## Introduction
-A cross-platform "Take a break" reminder implementing a few variants of the 20-20-20 rule in C++/Qt.
+- A cross-platform tool that reminds you to take a break from the screen, but in Qt.
 
 ## Screenshots
 <img src="./images/screenshot1.png" />

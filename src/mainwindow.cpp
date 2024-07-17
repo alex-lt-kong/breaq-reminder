@@ -1,11 +1,12 @@
 #include "mainwindow.h"
-#include <QtCore>
-#include <QtGui>
 #include "dialog-editnotes.h"
 #include "ui_mainwindow.h"
 
+#include <QtCore>
+#include <QtGui>
+
 #define ORGANIZATION_NAME "ak-studio"
-#define APPLICATION_NAME "q-break-reminder"
+#define APPLICATION_NAME "breakq-reminder"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -106,10 +107,10 @@ void MainWindow::on_ForegroundCycleDurationChanged()
 
 void MainWindow::initTrayMenu()
 {
-    setWindowIcon(QIcon(":/leaf.png"));
+    setWindowIcon(QIcon(":/leaf.ico"));
     trayIcon = new QSystemTrayIcon(this);
-    trayIcon->setIcon(QIcon(":/leaf.png"));
-    trayIcon->setToolTip("QBreak Reminder");
+    trayIcon->setIcon(QIcon(":/leaf.ico"));
+    trayIcon->setToolTip("Breaq Reminder");
 
     trayIcon->show();
 
@@ -257,7 +258,8 @@ MainWindow::~MainWindow()
 void MainWindow::backgroundLoop()
 {
     int t = (background_cycle_duration_min * 60 - background_cycle_sec_count + 59) / 60;
-    trayIcon->setToolTip("QBreak Reminder\n" + QString::number(t) + " minute" + (t != 1 ? "s" : "") + " before the next break");
+    trayIcon->setToolTip("Breaq Reminder\n" + QString::number(t) + " minute" + (t != 1 ? "s" : "")
+                         + " before the next break");
     background_cycle_sec_count++;
 
     if (background_cycle_sec_count == background_cycle_duration_min * 60 - 10)
@@ -290,7 +292,7 @@ void MainWindow::foregroundLoop()
         // foreground_cycle_duration_sec during foreground cycle
         player->play();
 
-        ui->btnGo->setEnabled(true);
+        // ui->btnGo->setEnabled(true);
         ui->btnRestart->setEnabled(true);
         ui->btnGo->setText("Go!");
     }
@@ -326,13 +328,13 @@ void MainWindow::initBackgroundCycle()
     tmrBg->start(1000);
     tmrFg->stop();
     this->hide();
-    ui->btnGo->setEnabled(false);
+    // ui->btnGo->setEnabled(false);
     ui->btnRestart->setEnabled(false);
 }
 
 void MainWindow::foregroundLoopNotification()
 {
-    trayIcon->showMessage("QBreak Reminder", "Time to have a break!", QSystemTrayIcon::NoIcon, 3500);
+    trayIcon->showMessage("Breaq Reminder", "Time to have a break!", QSystemTrayIcon::NoIcon, 3500);
     // The original version is QSystemTrayIcon::Information, which will cause this bug:
     // https://stackoverflow.com/questions/45827951/missing-file-icon-is-shown-in-the-system-tray-when-running-showmessage-with-no
 }
@@ -361,7 +363,7 @@ void MainWindow::initForegroundCycle()
         if (actionRestoreWindow->isChecked()) {
             setWindowSizeAndLocation();
         }
-        ui->btnGo->setEnabled(false);
+        // ui->btnGo->setEnabled(false);
         ui->btnRestart->setEnabled(false);
     }
 }
