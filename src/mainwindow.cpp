@@ -14,15 +14,12 @@
 
 void MainWindow::initMediaPlayer()
 {
-    auto player = new QMediaPlayer(this);
-    SPDLOG_INFO("player->isAvailable(): {} ", player->isAvailable());
-    connect(player,
-            &QMediaPlayer::mediaStatusChanged,
-            this,
-            [this](QMediaPlayer::MediaStatus status) -> void {
-                // https://doc.qt.io/qt-6/qmediaplayer.html#MediaStatus-enum
-                SPDLOG_INFO("QMediaPlayer::mediaStatusChanged, status: {}", status);
-            });
+    player = new QMediaPlayer(this);
+    if (!player->isAvailable()) {
+        SPDLOG_INFO("player->isAvailable() == false, returning");
+        return;
+    }
+
     connect(player,
             &QMediaPlayer::errorOccurred,
             this,
@@ -31,29 +28,20 @@ void MainWindow::initMediaPlayer()
                              errorString.toStdString());
             });
     auto audioOutput = new QAudioOutput();
-    /*
-    const QList<QAudioDevice> audioDevices = QMediaDevices::audioInputs();
-    SPDLOG_INFO("Audio device list:");
-    for (const QAudioDevice &device : audioDevices) {
-        SPDLOG_INFO("ID: {}, description: {}, isDefault: {}",
-                    device.id().toStdString(),
-                    device.description().toStdString(),
-                    QString::number(device.isDefault()).toStdString());
-    }
-    */
-    // QAudioDevice info(QMediaDevices::defaultAudioOutput());
+
     audioOutput->setDevice(QMediaDevices::defaultAudioOutput());
     SPDLOG_INFO("audioOutput->device().description(): {}",
                 audioOutput->device().description().toStdString());
 
     player->setAudioOutput(audioOutput);
-
+    /*
     player->setSource(QUrl::fromLocalFile(
         "/home/mamsds/Documents/data1/repos/breaq-reminder/resources/notification.mp3"));
-    //player->setSource(QUrl(":/notification1.mp3"));
+    */
+    player->setSource(QUrl("qrc:/notification.mp3"));
     audioOutput->setVolume(50);
-    SPDLOG_INFO("player->errorString(): {}", player->errorString().toStdString());
-    SPDLOG_INFO("player->hasAudio(): {}", player->hasAudio());
+    // SPDLOG_INFO("player->errorString(): {}", player->errorString().toStdString());
+    // SPDLOG_INFO("player->hasAudio(): {}", player->hasAudio());
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -281,21 +269,32 @@ void MainWindow::setWindowSizeAndLocation()
 {
     // It appears that this function only needs to be called once to fix the size of the window.
     // this->setFixedSize(InitWindowWidth, InitWindowHeight);
-
+    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
+    std::vector<int> WindowXOffSets;
+    std::vector<int> WindowYOffSets;
     SPDLOG_INFO("Called, allScreens:");
     auto allScreens = QGuiApplication::screens();
     for (size_t i = 0; i < allScreens.size(); ++i) {
-        SPDLOG_INFO("manufacturer(): {}, model: {}, name: {}, selected: {}",
+        WindowXOffSets.push_back(settings.value(QString("WindowXOffSet_%1").arg(i), 0).toInt());
+        WindowYOffSets.push_back(settings.value(QString("WindowYOffSet_%1").arg(i), 0).toInt());
+        SPDLOG_INFO("[{}] selected: {}, manufacturer(): {}, model: {}, name: {}, WindowXOffSets: "
+                    "{}, WindowXOffSets: {}",
+                    i,
+                    screenIdx == i,
                     allScreens[i]->manufacturer().toStdString(),
                     allScreens[i]->model().toStdString(),
                     allScreens[i]->name().toStdString(),
-                    screenIdx == i);
+                    WindowXOffSets[i],
+                    WindowYOffSets[i]);
+        settings.setValue(QString("WindowXOffSet_%1").arg(i), WindowXOffSets[i]);
+        settings.setValue(QString("WindowYOffSet_%1").arg(i), WindowYOffSets[i]);
     }
     if (screenIdx >= allScreens.length()) {
         screenIdx = 0;
     }
     // Per Qt https://doc.qt.io/qt-6/qscreen.html#availableGeometry-prop
     // availableGeometry() will not be useful if X11 system has more than one monitor connected
+
     SPDLOG_INFO("availableGeometry(): {}x{}, availableSize(): {}x{}",
                 allScreens[screenIdx]->availableGeometry().width(),
                 allScreens[screenIdx]->availableGeometry().height(),
@@ -305,8 +304,8 @@ void MainWindow::setWindowSizeAndLocation()
     auto screenHeight = allScreens[screenIdx]->availableGeometry().height();
     auto screenX = allScreens[screenIdx]->availableGeometry().x();
     auto screenY = allScreens[screenIdx]->availableGeometry().y();
-    auto windowX = (screenWidth - this->size().width());
-    auto windowY = (screenHeight - this->size().height());
+    auto windowX = (screenWidth - this->size().width() + WindowXOffSets[screenIdx]);
+    auto windowY = (screenHeight - this->size().height() + WindowYOffSets[screenIdx]);
 
     setGeometry(screenX + windowX, screenY + windowY, this->size().width(), this->size().height());
 }
@@ -316,9 +315,9 @@ MainWindow::~MainWindow()
     for (int i = 0; i < actionScreens.size(); ++i) {
         delete actionScreens[i];
     }
-    delete actiongroupForegroundCycleDurationSec;
+    // delete actiongroupForegroundCycleDurationSec;
     delete menuTray;
-    delete trayIcon;
+    // delete trayIcon;
     delete ui;
 }
 
@@ -360,10 +359,12 @@ void MainWindow::foregroundLoop()
         // We need the !ui->btnGo->isEnabled() part as users can change\
         // foreground_cycle_duration_sec during foreground cycle
 
-        /*
-        if (player->hasAudio())
+        // SPDLOG_INFO("player->hasAudio()ing");
+        if (player->isAvailable()) {
             player->play();
-        */
+        } else
+            SPDLOG_WARN("player->isAvailable() is false, skipped play()ing");
+
         // ui->btnGo->setEnabled(true);
         ui->btnRestart->setEnabled(true);
         ui->btnGo->setText("Go!");
