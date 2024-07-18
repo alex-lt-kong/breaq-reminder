@@ -2,6 +2,9 @@
 #include "dialog-editnotes.h"
 #include "ui_mainwindow.h"
 
+#include <QAudioDevice>
+#include <QAudioOutput>
+#include <QMediaDevices>
 #include <QtCore>
 #include <QtGui>
 #include <spdlog/spdlog.h>
@@ -9,9 +12,53 @@
 #define ORGANIZATION_NAME "ak-studio"
 #define APPLICATION_NAME "breakq-reminder"
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow)
+void MainWindow::initMediaPlayer()
+{
+    auto player = new QMediaPlayer(this);
+    SPDLOG_INFO("player->isAvailable(): {} ", player->isAvailable());
+    connect(player,
+            &QMediaPlayer::mediaStatusChanged,
+            this,
+            [this](QMediaPlayer::MediaStatus status) -> void {
+                // https://doc.qt.io/qt-6/qmediaplayer.html#MediaStatus-enum
+                SPDLOG_INFO("QMediaPlayer::mediaStatusChanged, status: {}", status);
+            });
+    connect(player,
+            &QMediaPlayer::errorOccurred,
+            this,
+            [this](QMediaPlayer::Error error, const QString &errorString) -> void {
+                SPDLOG_ERROR("QMediaPlayer::errorOccurred, errorString: {}",
+                             errorString.toStdString());
+            });
+    auto audioOutput = new QAudioOutput();
+    /*
+    const QList<QAudioDevice> audioDevices = QMediaDevices::audioInputs();
+    SPDLOG_INFO("Audio device list:");
+    for (const QAudioDevice &device : audioDevices) {
+        SPDLOG_INFO("ID: {}, description: {}, isDefault: {}",
+                    device.id().toStdString(),
+                    device.description().toStdString(),
+                    QString::number(device.isDefault()).toStdString());
+    }
+    */
+    // QAudioDevice info(QMediaDevices::defaultAudioOutput());
+    audioOutput->setDevice(QMediaDevices::defaultAudioOutput());
+    SPDLOG_INFO("audioOutput->device().description(): {}",
+                audioOutput->device().description().toStdString());
+
+    player->setAudioOutput(audioOutput);
+
+    player->setSource(QUrl::fromLocalFile(
+        "/home/mamsds/Documents/data1/repos/breaq-reminder/resources/notification.mp3"));
+    //player->setSource(QUrl(":/notification1.mp3"));
+    audioOutput->setVolume(50);
+    SPDLOG_INFO("player->errorString(): {}", player->errorString().toStdString());
+    SPDLOG_INFO("player->hasAudio(): {}", player->hasAudio());
+}
+
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent)
+    , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -40,9 +87,7 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowTitleHint
                    | Qt::Dialog | Qt::Tool);
 
-    player = new QMediaPlayer(this);
-    //player->setVolume(50);
-    player->setSource(QUrl("qrc:/Notification.mp3"));
+    initMediaPlayer();
 
     //    QApplication::setFont(QFont("Noto Sans CJK SC Medium", 9));
 
@@ -140,9 +185,15 @@ void MainWindow::initTrayMenu()
 
     ag_screen_selection = new QActionGroup(this);
     menuScreenSelection = menuTray->addMenu("Select screen");
-    for (int i = 0; i < qApp->screens().length(); ++i) {
-        actionScreens.emplace_back(
-            menuScreenSelection->addAction(QString::number(i) + ": " + qApp->screens()[i]->name()));
+    auto allScreens = QGuiApplication::screens();
+    for (size_t i = 0; i < allScreens.size(); ++i) {
+        auto screenStr = QString("[%1]: %2, %3")
+                             .arg(QString::number(i),
+                                  allScreens[i]->manufacturer().length() > 0
+                                      ? allScreens[i]->manufacturer()
+                                      : "Unknown manufacturer",
+                                  allScreens[i]->name());
+        actionScreens.emplace_back(menuScreenSelection->addAction(screenStr));
         actionScreens[i]->setCheckable(true);
         ag_screen_selection->addAction(actionScreens[i]);
         connect(actionScreens[i], SIGNAL(changed()), this, SLOT(on_ScreenIndexChanged()));
@@ -231,10 +282,25 @@ void MainWindow::setWindowSizeAndLocation()
     // It appears that this function only needs to be called once to fix the size of the window.
     // this->setFixedSize(InitWindowWidth, InitWindowHeight);
 
+    SPDLOG_INFO("Called, allScreens:");
     auto allScreens = QGuiApplication::screens();
+    for (size_t i = 0; i < allScreens.size(); ++i) {
+        SPDLOG_INFO("manufacturer(): {}, model: {}, name: {}, selected: {}",
+                    allScreens[i]->manufacturer().toStdString(),
+                    allScreens[i]->model().toStdString(),
+                    allScreens[i]->name().toStdString(),
+                    screenIdx == i);
+    }
     if (screenIdx >= allScreens.length()) {
         screenIdx = 0;
     }
+    // Per Qt https://doc.qt.io/qt-6/qscreen.html#availableGeometry-prop
+    // availableGeometry() will not be useful if X11 system has more than one monitor connected
+    SPDLOG_INFO("availableGeometry(): {}x{}, availableSize(): {}x{}",
+                allScreens[screenIdx]->availableGeometry().width(),
+                allScreens[screenIdx]->availableGeometry().height(),
+                allScreens[screenIdx]->availableSize().width(),
+                allScreens[screenIdx]->availableSize().height());
     auto screenWidth = allScreens[screenIdx]->availableGeometry().width();
     auto screenHeight = allScreens[screenIdx]->availableGeometry().height();
     auto screenX = allScreens[screenIdx]->availableGeometry().x();
@@ -289,10 +355,15 @@ void MainWindow::foregroundLoop()
     }
 
     if (foreground_sec_count >= foreground_cycle_duration_sec) {
+        tmrFg->stop();
+        SPDLOG_INFO("tmrFg->stop()ed");
         // We need the !ui->btnGo->isEnabled() part as users can change\
         // foreground_cycle_duration_sec during foreground cycle
-        player->play();
 
+        /*
+        if (player->hasAudio())
+            player->play();
+        */
         // ui->btnGo->setEnabled(true);
         ui->btnRestart->setEnabled(true);
         ui->btnGo->setText("Go!");
@@ -328,9 +399,10 @@ void MainWindow::initBackgroundCycle()
     loadSettings();
     background_cycle_sec_count = 0;
     this->hide();
+    // tmrFg will be stopped by itself, but we will also stop() it here
     tmrFg->stop();
     tmrBg->start(1000);
-    SPDLOG_INFO("tmrFg->stop()ed, tmrBg->start()ed, background_cycle_duration_min: {}",
+    SPDLOG_INFO("tmrBg->start()ed, background_cycle_duration_min: {}",
                 background_cycle_duration_min);
     // ui->btnGo->setEnabled(false);
     ui->btnRestart->setEnabled(false);
@@ -413,4 +485,3 @@ void MainWindow::on_btnRestart_clicked()
     }
     initForegroundCycle();
 }
-

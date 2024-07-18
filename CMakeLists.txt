@@ -29,7 +29,7 @@ target_compile_definitions(BreaqReminder PRIVATE
 target_link_libraries(BreaqReminder PRIVATE
     Qt::Core
     Qt::Gui
-    Qt::Multimedia
+    Qt6::Multimedia
     Qt::Widgets
     spdlog::spdlog
 )

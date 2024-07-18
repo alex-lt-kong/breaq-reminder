@@ -47,6 +47,7 @@ private:
     void initForegroundCycle();
     void initBackgroundCycle();
     void foregroundLoopNotification();
+    void initMediaPlayer();
 
     void initTrayMenu();
     void setWindowSizeAndLocation();
