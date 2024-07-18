@@ -4,6 +4,7 @@
 
 #include <QtCore>
 #include <QtGui>
+#include <spdlog/spdlog.h>
 
 #define ORGANIZATION_NAME "ak-studio"
 #define APPLICATION_NAME "breakq-reminder"
@@ -287,7 +288,7 @@ void MainWindow::foregroundLoop()
                            + QString::number(foreground_cycle_duration_sec));
     }
 
-    if (foreground_sec_count >= foreground_cycle_duration_sec && !ui->btnGo->isEnabled()) {
+    if (foreground_sec_count >= foreground_cycle_duration_sec) {
         // We need the !ui->btnGo->isEnabled() part as users can change\
         // foreground_cycle_duration_sec during foreground cycle
         player->play();
@@ -323,17 +324,21 @@ void MainWindow::loadSettings()
 
 void MainWindow::initBackgroundCycle()
 {
+    SPDLOG_INFO("Called");
     loadSettings();
     background_cycle_sec_count = 0;
-    tmrBg->start(1000);
-    tmrFg->stop();
     this->hide();
+    tmrFg->stop();
+    tmrBg->start(1000);
+    SPDLOG_INFO("tmrFg->stop()ed, tmrBg->start()ed, background_cycle_duration_min: {}",
+                background_cycle_duration_min);
     // ui->btnGo->setEnabled(false);
     ui->btnRestart->setEnabled(false);
 }
 
 void MainWindow::foregroundLoopNotification()
 {
+    SPDLOG_INFO("Called");
     trayIcon->showMessage("Breaq Reminder", "Time to have a break!", QSystemTrayIcon::NoIcon, 3500);
     // The original version is QSystemTrayIcon::Information, which will cause this bug:
     // https://stackoverflow.com/questions/45827951/missing-file-icon-is-shown-in-the-system-tray-when-running-showmessage-with-no
@@ -341,6 +346,7 @@ void MainWindow::foregroundLoopNotification()
 
 void MainWindow::initForegroundCycle()
 {
+    SPDLOG_INFO("Called");
     loadSettings();
     foreground_sec_count = 0;
     background_cycle_sec_count = 0;
@@ -358,13 +364,14 @@ void MainWindow::initForegroundCycle()
         }
         initBackgroundCycle();
     } else {
-        this->show();
         tmrFg->start(1000);
         if (actionRestoreWindow->isChecked()) {
             setWindowSizeAndLocation();
         }
         // ui->btnGo->setEnabled(false);
+        ui->progressBar->setValue(0);
         ui->btnRestart->setEnabled(false);
+        this->show();
     }
 }
 

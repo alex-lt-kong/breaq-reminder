@@ -1,13 +1,15 @@
+#include "logger.h"
 #include "mainwindow.h"
 
 #include <QApplication>
-
+#include <spdlog/spdlog.h>
 
 int main(int argc, char *argv[])
 {
+    init_logger();
+    SPDLOG_INFO("BreaqReminder started");
     QApplication a(argc, argv);
     MainWindow w;
-
     /*
     QFont font = w.font();
     if (QGuiApplication::platformName() == "windows") {
