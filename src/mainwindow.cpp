@@ -426,8 +426,7 @@ void MainWindow::initForegroundCycle()
     tmrBg->stop();
 
     if (breaks_to_skip > 0) {
-        qDebug() << "breaks_to_skip: " << breaks_to_skip
-                 << ", this foregound cycle will be skipped";
+        SPDLOG_INFO("breaks_to_skip: {}, this foregound cycle will be skipped", breaks_to_skip);
         --breaks_to_skip;
         for (int i = 0; i < action_break_counts.size(); ++i) {
             if (i == breaks_to_skip) {
