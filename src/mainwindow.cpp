@@ -272,20 +272,20 @@ void MainWindow::setWindowSizeAndLocation()
     QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
     std::vector<int> WindowXOffSets;
     std::vector<int> WindowYOffSets;
-    SPDLOG_INFO("Called, allScreens:");
+    SPDLOG_DEBUG("Called, allScreens:");
     auto allScreens = QGuiApplication::screens();
     for (size_t i = 0; i < allScreens.size(); ++i) {
         WindowXOffSets.push_back(settings.value(QString("WindowXOffSet_%1").arg(i), 0).toInt());
         WindowYOffSets.push_back(settings.value(QString("WindowYOffSet_%1").arg(i), 0).toInt());
-        SPDLOG_INFO("[{}] selected: {}, manufacturer(): {}, model: {}, name: {}, WindowXOffSets: "
-                    "{}, WindowXOffSets: {}",
-                    i,
-                    screenIdx == i,
-                    allScreens[i]->manufacturer().toStdString(),
-                    allScreens[i]->model().toStdString(),
-                    allScreens[i]->name().toStdString(),
-                    WindowXOffSets[i],
-                    WindowYOffSets[i]);
+        SPDLOG_DEBUG("[{}] selected: {}, manufacturer(): {}, model: {}, name: {}, WindowXOffSets: "
+                     "{}, WindowXOffSets: {}",
+                     i,
+                     screenIdx == i,
+                     allScreens[i]->manufacturer().toStdString(),
+                     allScreens[i]->model().toStdString(),
+                     allScreens[i]->name().toStdString(),
+                     WindowXOffSets[i],
+                     WindowYOffSets[i]);
         settings.setValue(QString("WindowXOffSet_%1").arg(i), WindowXOffSets[i]);
         settings.setValue(QString("WindowYOffSet_%1").arg(i), WindowYOffSets[i]);
     }
@@ -295,11 +295,11 @@ void MainWindow::setWindowSizeAndLocation()
     // Per Qt https://doc.qt.io/qt-6/qscreen.html#availableGeometry-prop
     // availableGeometry() will not be useful if X11 system has more than one monitor connected
 
-    SPDLOG_INFO("availableGeometry(): {}x{}, availableSize(): {}x{}",
-                allScreens[screenIdx]->availableGeometry().width(),
-                allScreens[screenIdx]->availableGeometry().height(),
-                allScreens[screenIdx]->availableSize().width(),
-                allScreens[screenIdx]->availableSize().height());
+    SPDLOG_DEBUG("availableGeometry(): {}x{}, availableSize(): {}x{}",
+                 allScreens[screenIdx]->availableGeometry().width(),
+                 allScreens[screenIdx]->availableGeometry().height(),
+                 allScreens[screenIdx]->availableSize().width(),
+                 allScreens[screenIdx]->availableSize().height());
     auto screenWidth = allScreens[screenIdx]->availableGeometry().width();
     auto screenHeight = allScreens[screenIdx]->availableGeometry().height();
     auto screenX = allScreens[screenIdx]->availableGeometry().x();
@@ -403,7 +403,7 @@ void MainWindow::initBackgroundCycle()
     // tmrFg will be stopped by itself, but we will also stop() it here
     tmrFg->stop();
     tmrBg->start(1000);
-    SPDLOG_INFO("tmrBg->start()ed, background_cycle_duration_min: {}",
+    SPDLOG_INFO("tmrFg->stop()'ed, tmrBg->start()'ed, background_cycle_duration_min: {}",
                 background_cycle_duration_min);
     // ui->btnGo->setEnabled(false);
     ui->btnRestart->setEnabled(false);
