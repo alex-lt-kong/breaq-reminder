@@ -20,7 +20,10 @@ qt_add_executable(BreaqReminder WIN32 MACOSX_BUNDLE
     ./src/mainwindow.cpp
     ./src/mainwindow.h
     ./src/mainwindow.ui
-    src/logger.h src/logger.cpp
+    ./src/logger.h
+    ./src/logger.cpp
+    ./src/global_variables.h
+    ./src/global_variables.cpp
 )
 target_compile_definitions(BreaqReminder PRIVATE
     QT_DEPRECATED_WARNINGS

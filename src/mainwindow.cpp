@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "dialog-editnotes.h"
+#include "src/global_variables.h"
 #include "ui_mainwindow.h"
 
 #include <QAudioDevice>
@@ -8,9 +9,6 @@
 #include <QtCore>
 #include <QtGui>
 #include <spdlog/spdlog.h>
-
-#define ORGANIZATION_NAME "ak-studio"
-#define APPLICATION_NAME "breakq-reminder"
 
 void MainWindow::initMediaPlayer()
 {
@@ -34,14 +32,9 @@ void MainWindow::initMediaPlayer()
                 audioOutput->device().description().toStdString());
 
     player->setAudioOutput(audioOutput);
-    /*
-    player->setSource(QUrl::fromLocalFile(
-        "/home/mamsds/Documents/data1/repos/breaq-reminder/resources/notification.mp3"));
-    */
+
     player->setSource(QUrl("qrc:/notification.mp3"));
     audioOutput->setVolume(50);
-    // SPDLOG_INFO("player->errorString(): {}", player->errorString().toStdString());
-    // SPDLOG_INFO("player->hasAudio(): {}", player->hasAudio());
 }
 
 MainWindow::MainWindow(QWidget *parent)
@@ -92,7 +85,6 @@ void MainWindow::on_actionExitTriggered()
 
 void MainWindow::on_BackgroundCycleDurationChanged()
 {
-    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
     if (actionBgLen1->isChecked())
         settings.setValue("BackgroundCycleDurationMin", 1);
     else if (actionBgLen15->isChecked())
@@ -106,7 +98,6 @@ void MainWindow::on_BackgroundCycleDurationChanged()
 
 void MainWindow::on_ScreenIndexChanged()
 {
-    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
     for (int i = 0; i < actionScreens.size(); ++i) {
         if (actionScreens[i]->isChecked())
             settings.setValue("ScreenIndex", i);
@@ -127,7 +118,6 @@ void MainWindow::on_SkipBreaksChanged()
 
 void MainWindow::on_ForegroundCycleDurationChanged()
 {
-    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
     if (actionFgLen20->isChecked())
         settings.setValue("ForegroundCycleDurationSec", 20);
     else if (actionFgLen40->isChecked())
@@ -234,13 +224,11 @@ void MainWindow::on_actionRestoreWindowTriggered()
 {
     IsRestoreWindow = !IsRestoreWindow;
     actionRestoreWindow->setChecked(IsRestoreWindow);
-    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
     settings.setValue("RestoreWindow", IsRestoreWindow);
 }
 
 void MainWindow::UpdatTrayMenuCheckStatus()
 {
-    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
     auto t = settings.value("BackgroundCycleDurationMin").toInt();
     if (t == 1)
         actionBgLen1->setChecked(true);
@@ -269,7 +257,6 @@ void MainWindow::setWindowSizeAndLocation()
 {
     // It appears that this function only needs to be called once to fix the size of the window.
     // this->setFixedSize(InitWindowWidth, InitWindowHeight);
-    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
     std::vector<int> WindowXOffSets;
     std::vector<int> WindowYOffSets;
     SPDLOG_DEBUG("Called, allScreens:");
@@ -319,6 +306,8 @@ MainWindow::~MainWindow()
     delete menuTray;
     // delete trayIcon;
     delete ui;
+
+    SPDLOG_INFO("BreaqReminder exited");
 }
 
 void MainWindow::backgroundLoop()
@@ -377,7 +366,6 @@ void MainWindow::foregroundLoop()
 
 void MainWindow::loadSettings()
 {
-    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
     background_cycle_duration_min = settings.value("BackgroundCycleDurationMin").toInt();
     foreground_cycle_duration_sec = settings.value("ForegroundCycleDurationSec").toInt();
     screenIdx = settings.value("ScreenIndex", 0).toInt();
@@ -455,7 +443,6 @@ void MainWindow::on_actionEditNotesTriggered()
 
 void MainWindow::on_plainTextEdit_textChanged()
 {
-    QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
     settings.setValue("Notes", ui->plainTextEdit->toPlainText());
     ui->textEditMarkdownDisp->setMarkdown(ui->plainTextEdit->toPlainText());
 }
@@ -468,20 +455,14 @@ void MainWindow::on_pushButtonClicked()
 
 void MainWindow::on_btnGo_clicked()
 {
-    {
-        QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
-        settings.setValue("MainWindowWidth", size().width());
-        settings.setValue("MainWindowHeight", size().height());
-    }
+    settings.setValue("MainWindowWidth", size().width());
+    settings.setValue("MainWindowHeight", size().height());
     initBackgroundCycle();
 }
 
 void MainWindow::on_btnRestart_clicked()
 {
-    {
-        QSettings settings(ORGANIZATION_NAME, APPLICATION_NAME);
-        settings.setValue("MainWindowWidth", size().width());
-        settings.setValue("MainWindowHeight", size().height());
-    }
+    settings.setValue("MainWindowWidth", size().width());
+    settings.setValue("MainWindowHeight", size().height());
     initForegroundCycle();
 }

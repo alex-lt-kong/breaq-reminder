@@ -1,3 +1,4 @@
+#include "global_variables.h"
 #include "logger.h"
 #include "mainwindow.h"
 
@@ -8,14 +9,8 @@ int main(int argc, char *argv[])
 {
     init_logger();
     SPDLOG_INFO("BreaqReminder started");
+    SPDLOG_INFO("Settings are stored at: {}", settings.fileName().toStdString());
     QApplication a(argc, argv);
     MainWindow w;
-    /*
-    QFont font = w.font();
-    if (QGuiApplication::platformName() == "windows") {
-        font.setFamily("Microsoft Yahei");
-    }
-    QApplication::setFont(font);
-    */
     return a.exec();
 }
