@@ -45,9 +45,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     tmrBg = new QTimer(this);
     connect(tmrBg, SIGNAL(timeout()), this, SLOT(backgroundLoop()));
-    tmrFg = new QTimer();
+    tmrFg = new QTimer(this);
     connect(tmrFg, SIGNAL(timeout()), this, SLOT(foregroundLoop()));
-
+    tmrResetWindow = new QTimer(this);
+    connect(tmrResetWindow, SIGNAL(timeout()), this, SLOT(setWindowSizeAndLocation()));
+    tmrResetWindow->start(10000);
     initTrayMenu();
     initBackgroundCycle();
     // initBackgroundCycle() calls loadSettings();
@@ -56,24 +58,11 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->textEditMarkdownDisp->document()->setIndentWidth(15);
     ui->textEditMarkdownDisp->document()->setBaselineOffset(-10);
-    /*
-    qreal lineSpacing = 10;
-    QTextCursor textCursor = ui->textEditMarkdownDisp->textCursor();
-    QTextBlockFormat *newFormat = new QTextBlockFormat();
-    textCursor.clearSelection();
-    textCursor.select(QTextCursor::Document);
-    newFormat->setLineHeight(lineSpacing, QTextBlockFormat::ProportionalHeight);
-    textCursor.setBlockFormat(*newFormat);*/
 
     setWindowFlags(Qt::WindowStaysOnTopHint | Qt::CustomizeWindowHint | Qt::WindowTitleHint
                    | Qt::Dialog | Qt::Tool);
 
     initMediaPlayer();
-
-    //    QApplication::setFont(QFont("Noto Sans CJK SC Medium", 9));
-
-    //InitWindowWidth = this->size().width();
-    //InitWindowHeight = this->size().height();
 }
 
 void MainWindow::on_actionExitTriggered()
@@ -83,7 +72,7 @@ void MainWindow::on_actionExitTriggered()
     QApplication::quit();
 }
 
-void MainWindow::on_BackgroundCycleDurationChanged()
+void MainWindow::action_BackgroundCycleDurationChanged()
 {
     if (actionBgLen1->isChecked())
         settings.setValue("BackgroundCycleDurationMin", 1);
@@ -188,9 +177,9 @@ void MainWindow::initTrayMenu()
     ag_background_cycle_duration_min->addAction(actionBgLen1);
     ag_background_cycle_duration_min->addAction(actionBgLen15);
     ag_background_cycle_duration_min->addAction(actionBgLen20);
-    connect(actionBgLen1, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
-    connect(actionBgLen15, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
-    connect(actionBgLen20, SIGNAL(changed()), this, SLOT(on_BackgroundCycleDurationChanged()));
+    connect(actionBgLen1, SIGNAL(changed()), this, SLOT(action_BackgroundCycleDurationChanged()));
+    connect(actionBgLen15, SIGNAL(changed()), this, SLOT(action_BackgroundCycleDurationChanged()));
+    connect(actionBgLen20, SIGNAL(changed()), this, SLOT(action_BackgroundCycleDurationChanged()));
 
     menuFgLengthSettings = menuTray->addMenu("Break Length (Sec)");
     actionFgLen20 = menuFgLengthSettings->addAction("20");
@@ -255,6 +244,10 @@ void MainWindow::UpdatTrayMenuCheckStatus()
 
 void MainWindow::setWindowSizeAndLocation()
 {
+    if (!this->isVisible())
+        return;
+    if (!IsRestoreWindow)
+        return;
     // It appears that this function only needs to be called once to fix the size of the window.
     // this->setFixedSize(InitWindowWidth, InitWindowHeight);
     std::vector<int> WindowXOffSets;

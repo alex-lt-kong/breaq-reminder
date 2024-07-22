@@ -31,17 +31,19 @@ private slots:
     void on_actionRestoreWindowTriggered();
     void on_actionExitTriggered();
     void on_ForegroundCycleDurationChanged();
-    void on_BackgroundCycleDurationChanged();
+    void action_BackgroundCycleDurationChanged();
     void on_plainTextEdit_textChanged();
     void on_pushButtonClicked();
     void on_btnGo_clicked();
     void on_btnRestart_clicked();
     void on_ScreenIndexChanged();
     void on_SkipBreaksChanged();
+    void setWindowSizeAndLocation();
 
 private:
     Ui::MainWindow *ui;
     QTimer *tmrBg;
+    QTimer *tmrResetWindow;
     QTimer *tmrFg;
 
     void initForegroundCycle();
@@ -50,7 +52,6 @@ private:
     void initMediaPlayer();
 
     void initTrayMenu();
-    void setWindowSizeAndLocation();
     void UpdatTrayMenuCheckStatus();
     void loadSettings();
     QString secondsToString(qint64 seconds);
