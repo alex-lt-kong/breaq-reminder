@@ -21,7 +21,7 @@ void MainWindow::initMediaPlayer()
     connect(player,
             &QMediaPlayer::errorOccurred,
             this,
-            [this](QMediaPlayer::Error error, const QString &errorString) -> void {
+            [](QMediaPlayer::Error error, const QString &errorString) -> void {
                 SPDLOG_ERROR("QMediaPlayer::errorOccurred, errorString: {}",
                              errorString.toStdString());
             });
@@ -87,7 +87,7 @@ void MainWindow::action_BackgroundCycleDurationChanged()
 
 void MainWindow::on_ScreenIndexChanged()
 {
-    for (int i = 0; i < actionScreens.size(); ++i) {
+    for (size_t i = 0; i < actionScreens.size(); ++i) {
         if (actionScreens[i]->isChecked())
             settings.setValue("ScreenIndex", i);
     }
@@ -97,7 +97,7 @@ void MainWindow::on_ScreenIndexChanged()
 void MainWindow::on_SkipBreaksChanged()
 {
     breaks_to_skip = 0;
-    for (int i = 0; i < action_break_counts.size(); ++i) {
+    for (size_t i = 0; i < action_break_counts.size(); ++i) {
         if (action_break_counts[i]->isChecked()) {
             breaks_to_skip = i;
             break;
@@ -153,7 +153,7 @@ void MainWindow::initTrayMenu()
     ag_screen_selection = new QActionGroup(this);
     menuScreenSelection = menuTray->addMenu("Select screen");
     auto allScreens = QGuiApplication::screens();
-    for (size_t i = 0; i < allScreens.size(); ++i) {
+    for (int64_t i = 0; i < allScreens.size(); ++i) {
         auto screenStr = QString("[%1]: %2, %3")
                              .arg(QString::number(i),
                                   allScreens[i]->manufacturer().length() > 0
@@ -254,7 +254,7 @@ void MainWindow::setWindowSizeAndLocation()
     std::vector<int> WindowYOffSets;
     SPDLOG_DEBUG("Called, allScreens:");
     auto allScreens = QGuiApplication::screens();
-    for (size_t i = 0; i < allScreens.size(); ++i) {
+    for (int64_t i = 0; i < allScreens.size(); ++i) {
         WindowXOffSets.push_back(settings.value(QString("WindowXOffSet_%1").arg(i), 0).toInt());
         WindowYOffSets.push_back(settings.value(QString("WindowYOffSet_%1").arg(i), 0).toInt());
         SPDLOG_DEBUG("[{}] selected: {}, manufacturer(): {}, model: {}, name: {}, WindowXOffSets: "
@@ -292,7 +292,7 @@ void MainWindow::setWindowSizeAndLocation()
 
 MainWindow::~MainWindow()
 {
-    for (int i = 0; i < actionScreens.size(); ++i) {
+    for (size_t i = 0; i < actionScreens.size(); ++i) {
         delete actionScreens[i];
     }
     // delete actiongroupForegroundCycleDurationSec;

@@ -5,9 +5,15 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
+message(CMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}")
+
+
 find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui Multimedia Widgets)
 find_package(spdlog CONFIG REQUIRED)
+
+include(cmake/compiler-flags.cmake)
+include(cmake/sanitizers.cmake)
 
 qt_standard_project_setup()
 
@@ -24,6 +30,7 @@ qt_add_executable(BreaqReminder WIN32 MACOSX_BUNDLE
     ./src/logger.cpp
     ./src/global_variables.h
     ./src/global_variables.cpp
+    cmake/compiler-flags.cmake cmake/sanitizers.cmake
 )
 target_compile_definitions(BreaqReminder PRIVATE
     QT_DEPRECATED_WARNINGS
