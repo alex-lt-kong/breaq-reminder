@@ -89,7 +89,7 @@ void MainWindow::on_ScreenIndexChanged()
 {
     for (size_t i = 0; i < actionScreens.size(); ++i) {
         if (actionScreens[i]->isChecked())
-            settings.setValue("ScreenIndex", i);
+            settings.setValue("ScreenIndex", QVariant::fromValue(i));
     }
     loadSettings();
 }
