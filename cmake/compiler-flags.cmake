@@ -32,8 +32,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clan
       add_compile_options("-Wl,-z,now")
       add_compile_options("-Wl,-z,relro")
     endif()
-    if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    endif()
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
   # using Intel C++
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
@@ -60,6 +58,3 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options("-fno-common")
   add_compile_options("-Wl,--gc-sections")
 endif()
-
-
-

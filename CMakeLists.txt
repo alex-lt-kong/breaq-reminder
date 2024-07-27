@@ -14,6 +14,7 @@ find_package(spdlog CONFIG REQUIRED)
 
 include(cmake/compiler-flags.cmake)
 include(cmake/sanitizers.cmake)
+include(cmake/git.cmake)
 
 qt_standard_project_setup()
 
@@ -31,9 +32,11 @@ qt_add_executable(BreaqReminder WIN32 MACOSX_BUNDLE
     ./src/global_variables.h
     ./src/global_variables.cpp
     cmake/compiler-flags.cmake cmake/sanitizers.cmake
+    cmake/git.cmake
 )
 target_compile_definitions(BreaqReminder PRIVATE
     QT_DEPRECATED_WARNINGS
+    "-DGIT_COMMIT_HASH=\"${GIT_COMMIT_HASH}\""
 )
 
 target_link_libraries(BreaqReminder PRIVATE

@@ -1,0 +1,17 @@
+2024-07-27T18:23:02.945131+08:00 | 10182 |                                     main |     info | BreaqReminder started (git commit: 609ddd08bd6bd3632bd115b0a6c66f921180adef)
+2024-07-27T18:23:02.945195+08:00 | 10182 |                                     main |     info | Settings are stored at: /home/mamsds/.config/ak-studio/breakq-reminder.conf
+2024-07-27T18:23:03.058881+08:00 | 10182 |                      initBackgroundCycle |     info | Called
+2024-07-27T18:23:03.058953+08:00 | 10182 |                      initBackgroundCycle |     info | tmrFg->stop()'ed, tmrBg->start()'ed, background_cycle_duration_min: 15
+2024-07-27T18:23:03.069411+08:00 | 10182 |                          initMediaPlayer |     info | audioOutput->device().description(): Family 17h/19h HD Audio Controller Speaker + Headphones
+2024-07-27T18:27:13.993880+08:00 | 10182 |                              ~MainWindow |     info | BreaqReminder exited
+2024-07-27T18:31:24.401868+08:00 | 11019 |                                     main |     info | BreaqReminder started (git commit: 609ddd08bd6bd3632bd115b0a6c66f921180adef)
+2024-07-27T18:31:24.401931+08:00 | 11019 |                                     main |     info | Settings are stored at: /home/mamsds/.config/ak-studio/breakq-reminder.conf
+2024-07-27T18:31:24.502789+08:00 | 11019 |                      initBackgroundCycle |     info | Called
+2024-07-27T18:31:24.502864+08:00 | 11019 |                      initBackgroundCycle |     info | tmrFg->stop()'ed, tmrBg->start()'ed, background_cycle_duration_min: 1
+2024-07-27T18:31:24.512900+08:00 | 11019 |                          initMediaPlayer |     info | audioOutput->device().description(): Family 17h/19h HD Audio Controller Speaker + Headphones
+2024-07-27T18:32:14.640371+08:00 | 11019 |               foregroundLoopNotification |     info | Called
+2024-07-27T18:32:24.639817+08:00 | 11019 |                      initForegroundCycle |     info | Called
+2024-07-27T18:32:30.572774+08:00 | 11019 |                      initBackgroundCycle |     info | Called
+2024-07-27T18:32:30.574309+08:00 | 11019 |                      initBackgroundCycle |     info | tmrFg->stop()'ed, tmrBg->start()'ed, background_cycle_duration_min: 1
+2024-07-27T18:33:20.639186+08:00 | 11019 |               foregroundLoopNotification |     info | Called
+2024-07-27T18:33:24.039481+08:00 | 11019 |                              ~MainWindow |     info | BreaqReminder exited

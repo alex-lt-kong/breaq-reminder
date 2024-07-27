@@ -248,6 +248,7 @@ void MainWindow::setWindowSizeAndLocation()
         return;
     if (!IsRestoreWindow)
         return;
+    SPDLOG_INFO("Called");
     // It appears that this function only needs to be called once to fix the size of the window.
     // this->setFixedSize(InitWindowWidth, InitWindowHeight);
     std::vector<int> WindowXOffSets;
@@ -418,13 +419,12 @@ void MainWindow::initForegroundCycle()
         initBackgroundCycle();
     } else {
         tmrFg->start(1000);
-        if (actionRestoreWindow->isChecked()) {
-            setWindowSizeAndLocation();
-        }
-        // ui->btnGo->setEnabled(false);
         ui->progressBar->setValue(0);
         ui->btnRestart->setEnabled(false);
         this->show();
+        if (actionRestoreWindow->isChecked()) {
+            setWindowSizeAndLocation();
+        }
     }
 }
 
