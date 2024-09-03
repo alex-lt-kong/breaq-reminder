@@ -18,6 +18,8 @@ include(cmake/git.cmake)
 
 qt_standard_project_setup()
 
+set(app_icon_resource_windows "${CMAKE_CURRENT_SOURCE_DIR}/resources/res.win.rc")
+
 qt_add_executable(BreaqReminder WIN32 MACOSX_BUNDLE
     ./resources/res.qrc
     ./src/dialog-editnotes.cpp
@@ -33,6 +35,7 @@ qt_add_executable(BreaqReminder WIN32 MACOSX_BUNDLE
     ./src/global_variables.cpp
     cmake/compiler-flags.cmake cmake/sanitizers.cmake
     cmake/git.cmake
+    ${app_icon_resource_windows}
 )
 target_compile_definitions(BreaqReminder PRIVATE
     QT_DEPRECATED_WARNINGS
